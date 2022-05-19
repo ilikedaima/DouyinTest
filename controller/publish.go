@@ -2,14 +2,17 @@ package controller
 
 import (
 	"fmt"
-	"github.com/gin-gonic/gin"
 	"net/http"
 	"path/filepath"
+	"simpledemo/dao"
+	"simpledemo/model"
+
+	"github.com/gin-gonic/gin"
 )
 
 type VideoListResponse struct {
-	Response
-	VideoList []Video `json:"video_list"`
+	model.Response
+	VideoList []model.VideoInfo `json:"video_list"`
 }
 
 // Publish check token then save upload file to public directory
@@ -17,13 +20,13 @@ func Publish(c *gin.Context) {
 	token := c.PostForm("token")
 
 	if _, exist := usersLoginInfo[token]; !exist {
-		c.JSON(http.StatusOK, Response{StatusCode: 1, StatusMsg: "User doesn't exist"})
+		c.JSON(http.StatusOK, model.Response{StatusCode: 1, StatusMsg: "User doesn't exist"})
 		return
 	}
 
 	data, err := c.FormFile("data")
 	if err != nil {
-		c.JSON(http.StatusOK, Response{
+		c.JSON(http.StatusOK, model.Response{
 			StatusCode: 1,
 			StatusMsg:  err.Error(),
 		})
@@ -34,15 +37,26 @@ func Publish(c *gin.Context) {
 	user := usersLoginInfo[token]
 	finalName := fmt.Sprintf("%d_%s", user.Id, filename)
 	saveFile := filepath.Join("./public/", finalName)
+
+	
 	if err := c.SaveUploadedFile(data, saveFile); err != nil {
-		c.JSON(http.StatusOK, Response{
+		c.JSON(http.StatusOK, model.Response{
 			StatusCode: 1,
 			StatusMsg:  err.Error(),
 		})
 		return
 	}
+	//把信息存到数据库
+	video := model.Video{
+		Author: user.Id,
+		PlayUrl: model.UrlBase+finalName,
+		
+	}
+	dao.Mgr.Publish(video)
+	//-------------------
 
-	c.JSON(http.StatusOK, Response{
+
+	c.JSON(http.StatusOK, model.Response{
 		StatusCode: 0,
 		StatusMsg:  finalName + " uploaded successfully",
 	})
@@ -50,10 +64,22 @@ func Publish(c *gin.Context) {
 
 // PublishList all users have same publish video list
 func PublishList(c *gin.Context) {
+ 
+	videos := dao.Mgr.PublishList()
+	videoInfos := make([]model.VideoInfo,10)
+
+	for _,video := range videos {
+		user := dao.Mgr.GetUser(video.Author)
+		videoInfos = append(videoInfos, model.VideoInfo{
+			Id: video.Id,
+			PlayUrl: video.PlayUrl,
+			Author: user,
+		})
+	}
 	c.JSON(http.StatusOK, VideoListResponse{
-		Response: Response{
+		Response: model.Response{
 			StatusCode: 0,
 		},
-		VideoList: DemoVideos,
+		VideoList: videoInfos,
 	})
 }

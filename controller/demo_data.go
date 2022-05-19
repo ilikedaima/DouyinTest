@@ -1,6 +1,7 @@
 package controller
 
-var DemoVideos = []Video{
+import "simpledemo/model"
+var DemoVideos = []model.VideoInfo{
 	{
 		Id:            1,
 		Author:        DemoUser,
@@ -12,7 +13,7 @@ var DemoVideos = []Video{
 	},
 }
 
-var DemoComments = []Comment{
+var DemoComments = []model.Comment{
 	{
 		Id:         1,
 		User:       DemoUser,
@@ -21,7 +22,7 @@ var DemoComments = []Comment{
 	},
 }
 
-var DemoUser = User{
+var DemoUser = model.UserInfo{
 	Id:            1,
 	Name:          "TestUser",
 	FollowCount:   0,

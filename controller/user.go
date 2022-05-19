@@ -1,15 +1,19 @@
 package controller
 
 import (
-	"github.com/gin-gonic/gin"
+	"fmt"
 	"net/http"
-	"sync/atomic"
+	"simpledemo/dao"
+	"simpledemo/model"
+	"simpledemo/utils"
+
+	"github.com/gin-gonic/gin"
 )
 
 // usersLoginInfo use map to store user info, and key is username+password for demo
 // user data will be cleared every time the server starts
 // test data: username=zhanglei, password=douyin
-var usersLoginInfo = map[string]User{
+var usersLoginInfo = map[string]model.User{
 	"zhangleidouyin": {
 		Id:            1,
 		Name:          "zhanglei",
@@ -22,56 +26,69 @@ var usersLoginInfo = map[string]User{
 var userIdSequence = int64(1)
 
 type UserLoginResponse struct {
-	Response
+	model.Response
 	UserId int64  `json:"user_id,omitempty"`
 	Token  string `json:"token"`
 }
 
 type UserResponse struct {
-	Response
-	User User `json:"user"`
+	model.Response
+	User model.User `json:"user"`
 }
 
 func Register(c *gin.Context) {
-	username := c.Query("username")
-	password := c.Query("password")
-
-	token := username + password
-
-	if _, exist := usersLoginInfo[token]; exist {
+	username := c.PostForm("username")
+	password := c.PostForm("password")
+	fmt.Println("username:",username,"password:",password)
+	if username=="" || password == "" {
+		fmt.Println("用户或者密码不能为空")
+		return
+	}
+	// token := username + password
+	//password 用"golang.org/x/crypto/bcrypt"加密
+	encodePWD,err := utils.PasswordHash(password)
+	if err!=nil {
+		fmt.Println(err)
+	}
+	if _,ok := dao.Mgr.GetUserByPassAndUsername(username,encodePWD); ok {
 		c.JSON(http.StatusOK, UserLoginResponse{
-			Response: Response{StatusCode: 1, StatusMsg: "User already exist"},
+			Response: model.Response{StatusCode: 1, StatusMsg: "User already exist"},
 		})
 	} else {
-		atomic.AddInt64(&userIdSequence, 1)
-		newUser := User{
-			Id:   userIdSequence,
+		// atomic.AddInt64(&userIdSequence, 1)
+		newUser := model.User{
 			Name: username,
+			Password: encodePWD,
 		}
-		usersLoginInfo[token] = newUser
+		dao.Mgr.InsertUser(&newUser)
+
 		c.JSON(http.StatusOK, UserLoginResponse{
-			Response: Response{StatusCode: 0},
+			Response: model.Response{StatusCode: 0},
 			UserId:   userIdSequence,
-			Token:    username + password,
+			Token:    username + encodePWD,
 		})
 	}
 }
 
 func Login(c *gin.Context) {
-	username := c.Query("username")
-	password := c.Query("password")
-
-	token := username + password
-
-	if user, exist := usersLoginInfo[token]; exist {
+	username := c.PostForm("username")
+	password := c.PostForm("password")
+	var token string
+	
+	realPasswd := dao.Mgr.GetUserPasswd(username)
+	b := utils.CheckPasswd(password,realPasswd)
+	if b {
+		user := dao.Mgr.GetUserByUserName(username)
+		token = user.Name + "---" + realPasswd
+		fmt.Println(token)
 		c.JSON(http.StatusOK, UserLoginResponse{
-			Response: Response{StatusCode: 0},
+			Response: model.Response{StatusCode: 0},
 			UserId:   user.Id,
 			Token:    token,
 		})
 	} else {
 		c.JSON(http.StatusOK, UserLoginResponse{
-			Response: Response{StatusCode: 1, StatusMsg: "User doesn't exist"},
+			Response:model.Response{StatusCode: 1, StatusMsg: "User doesn't exist"},
 		})
 	}
 }
@@ -81,12 +98,12 @@ func UserInfo(c *gin.Context) {
 
 	if user, exist := usersLoginInfo[token]; exist {
 		c.JSON(http.StatusOK, UserResponse{
-			Response: Response{StatusCode: 0},
+			Response: model.Response{StatusCode: 0},
 			User:     user,
 		})
 	} else {
 		c.JSON(http.StatusOK, UserResponse{
-			Response: Response{StatusCode: 1, StatusMsg: "User doesn't exist"},
+			Response: model.Response{StatusCode: 1, StatusMsg: "User doesn't exist"},
 		})
 	}
 }
