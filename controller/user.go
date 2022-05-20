@@ -79,7 +79,7 @@ func Login(c *gin.Context) {
 	b := utils.CheckPasswd(password,realPasswd)
 	if b {
 		user := dao.Mgr.GetUserByUserName(username)
-		token = user.Name + "---" + realPasswd
+		token = user.Name + realPasswd
 		fmt.Println(token)
 		c.JSON(http.StatusOK, UserLoginResponse{
 			Response: model.Response{StatusCode: 0},

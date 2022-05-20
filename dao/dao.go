@@ -3,6 +3,7 @@ package dao
 import (
 	"fmt"
 	"log"
+	"runtime"
 	"simpledemo/model"
 
 	"gorm.io/driver/mysql"
@@ -25,7 +26,18 @@ type Manager interface {
 }
 
 func init() {
-	dsn := "root:123456@tcp(127.0.0.1:3306)/douyin?charset=utf8mb4&parseTime=True&loc=Local"
+	sysType := runtime.GOOS
+	var dsn string
+	if sysType == "linux" {
+		// LINUX系统
+		dsn = "root:cjghaolihai666__@tcp(127.0.0.1:3306)/douyin?charset=utf8mb4&parseTime=True&loc=Local"
+	}
+
+	if sysType == "windows" {
+		// windows系统
+		dsn = "root:cjghaolihai666__@tcp(110.42.180.195:3306)/douyin?charset=utf8mb4&parseTime=True&loc=Local"
+	}
+	
 	db, err := gorm.Open(mysql.Open(dsn), &gorm.Config{})
 	if err != nil {
 		log.Fatal("Failed to init db:", err)
