@@ -37,8 +37,8 @@ type UserResponse struct {
 }
 
 func Register(c *gin.Context) {
-	username := c.PostForm("username")
-	password := c.PostForm("password")
+	username := c.Query("username")
+	password := c.Query("password")
 	fmt.Println("username:",username,"password:",password)
 	if username=="" || password == "" {
 		fmt.Println("用户或者密码不能为空")
@@ -71,8 +71,8 @@ func Register(c *gin.Context) {
 }
 
 func Login(c *gin.Context) {
-	username := c.PostForm("username")
-	password := c.PostForm("password")
+	username := c.Query("username")
+	password := c.Query("password")
 	var token string
 	
 	realPasswd := dao.Mgr.GetUserPasswd(username)

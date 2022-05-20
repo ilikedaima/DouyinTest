@@ -24,9 +24,9 @@ type Manager interface {
 	GetUserByPassAndUsername(username string,password string) (model.UserInfo,bool)
 	GetUserByUserName(username string) model.User
 }
-
+var sysType = runtime.GOOS
 func init() {
-	sysType := runtime.GOOS
+	
 	var dsn string
 	if sysType == "linux" {
 		// LINUX系统
