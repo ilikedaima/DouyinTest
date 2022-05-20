@@ -34,7 +34,8 @@ func Publish(c *gin.Context) {
 	}
 
 	filename := filepath.Base(data.Filename)
-	user := usersLoginInfo[token]
+	// user := usersLoginInfo[token]
+	user := dao.Mgr.GetUserByUUID(token)
 	finalName := fmt.Sprintf("%d_%s", user.Id, filename)
 	saveFile := filepath.Join("./public/", finalName)
 
