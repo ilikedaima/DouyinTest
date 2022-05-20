@@ -65,21 +65,12 @@ func Publish(c *gin.Context) {
 // PublishList all users have same publish video list
 func PublishList(c *gin.Context) {
  
-	videos := dao.Mgr.PublishList()
-	videoInfos := make([]model.VideoInfo,10)
-
-	for _,video := range videos {
-		user := dao.Mgr.GetUser(video.Author)
-		videoInfos = append(videoInfos, model.VideoInfo{
-			Id: video.Id,
-			PlayUrl: video.PlayUrl,
-			Author: user,
-		})
-	}
+	vidvideoInfos := dao.Mgr.PublishList()
+	
 	c.JSON(http.StatusOK, VideoListResponse{
 		Response: model.Response{
 			StatusCode: 0,
 		},
-		VideoList: videoInfos,
+		VideoList: vidvideoInfos,
 	})
 }

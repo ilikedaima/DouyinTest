@@ -17,7 +17,7 @@ type manager struct {
 type Manager interface {
 	Feed() []model.Video
 	Publish(video model.Video) 
-	PublishList() []model.Video
+	PublishList() []model.VideoInfo
 	GetUser(pid int64) model.UserInfo
 	InsertUser(user *model.User)
 	GetUserPasswd(username string) string
@@ -56,10 +56,20 @@ func (mgr *manager) Publish(video model.Video) {
 	mgr.db.Create(video)
 }
 
-func (mgr *manager) PublishList() []model.Video{
+func (mgr *manager) PublishList() []model.VideoInfo{
 	var videos []model.Video
 	mgr.db.Find(&videos)
-	return videos
+
+	videoInfos := make([]model.VideoInfo,10)
+	for _,video := range videos {
+		user := mgr.GetUser(video.Author)
+		videoInfos = append(videoInfos, model.VideoInfo{
+			Id: video.Id,
+			PlayUrl: video.PlayUrl,
+			Author: user,
+		})
+	}
+	return videoInfos
 }
 
 func (mgr *manager) GetUser(pid int64) model.UserInfo{

@@ -66,7 +66,7 @@ func Register(c *gin.Context) {
 
 		c.JSON(http.StatusOK, UserLoginResponse{
 			Response: model.Response{StatusCode: 0},
-			UserId:   userIdSequence,
+			UserId:   newUser.Id,
 			Token:    uuid,
 		})
 	}
