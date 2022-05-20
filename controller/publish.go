@@ -51,7 +51,7 @@ func Publish(c *gin.Context) {
 	//把信息存到数据库
 	video := model.Video{
 		Author: user.Id,
-		PlayUrl: model.UrlBase+finalName,
+		PlayUrl: dao.UrlBase+finalName,
 		
 	}
 	dao.Mgr.Publish(&video)

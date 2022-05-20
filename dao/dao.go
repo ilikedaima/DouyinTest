@@ -26,17 +26,22 @@ type Manager interface {
 	GetUserByUUID(uuid string) model.User
 }
 var sysType = runtime.GOOS
+var UrlBase string
+
 func init() {
 	
 	var dsn string
 	if sysType == "linux" {
 		// LINUX系统
 		dsn = "root:cjghaolihai666__@tcp(127.0.0.1:3306)/douyin?charset=utf8mb4&parseTime=True&loc=Local"
+		UrlBase = "110.42.180.195:8777/static/"
+		
 	}
 
 	if sysType == "windows" {
 		// windows系统
 		dsn = "root:cjghaolihai666__@tcp(110.42.180.195:3306)/douyin?charset=utf8mb4&parseTime=True&loc=Local"
+		UrlBase = "127.0.0.1:8777/static/"
 	}
 	
 	db, err := gorm.Open(mysql.Open(dsn), &gorm.Config{})
@@ -73,9 +78,17 @@ func (mgr *manager) PublishList() []model.VideoInfo{
 }
 
 func (mgr *manager) GetUser(pid int64) model.UserInfo{
-	user := model.UserInfo{}
+	user := model.User{}
 	mgr.db.First(&user,pid)
-	return user
+	userInfo := model.UserInfo{
+		Name: user.Name,
+		Id: user.Id,
+		FollowCount: user.FollowCount,
+		FollowerCount: user.FollowerCount,
+		IsFollow: user.IsFollow,
+		UUID: user.UUID,
+	}
+	return userInfo
 }
 
 func (mgr *manager) GetUserByPassAndUsername(username string,password string) (model.UserInfo,bool){

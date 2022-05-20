@@ -47,6 +47,5 @@ type UserInfo struct {
 	FollowCount   int64  `json:"follow_count,omitempty"`
 	FollowerCount int64  `json:"follower_count,omitempty"`
 	IsFollow      bool   `json:"is_follow,omitempty"`
+	UUID          string `json:"uuid,omitempty"`
 }
-
-const UrlBase = "127.0.0.1:8777/static"
