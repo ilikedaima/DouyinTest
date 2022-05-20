@@ -54,7 +54,7 @@ func Publish(c *gin.Context) {
 		PlayUrl: model.UrlBase+finalName,
 		
 	}
-	dao.Mgr.Publish(video)
+	dao.Mgr.Publish(&video)
 	//-------------------
 
 

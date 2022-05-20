@@ -16,7 +16,7 @@ type manager struct {
 
 type Manager interface {
 	Feed() []model.Video
-	Publish(video model.Video) 
+	Publish(video *model.Video) 
 	PublishList() []model.VideoInfo
 	GetUser(pid int64) model.UserInfo
 	InsertUser(user *model.User)
@@ -52,7 +52,7 @@ func (mgr *manager) Feed() (videos []model.Video){
 	return
 }
 
-func (mgr *manager) Publish(video model.Video) {
+func (mgr *manager) Publish(video *model.Video) {
 	mgr.db.Create(video)
 }
 
