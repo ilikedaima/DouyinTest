@@ -56,16 +56,18 @@ func Register(c *gin.Context) {
 		})
 	} else {
 		// atomic.AddInt64(&userIdSequence, 1)
+		uuid := utils.GetUUID()
 		newUser := model.User{
 			Name: username,
 			Password: encodePWD,
+			UUID: uuid,
 		}
 		dao.Mgr.InsertUser(&newUser)
 
 		c.JSON(http.StatusOK, UserLoginResponse{
 			Response: model.Response{StatusCode: 0},
 			UserId:   userIdSequence,
-			Token:    username + encodePWD,
+			Token:    uuid,
 		})
 	}
 }
@@ -79,7 +81,8 @@ func Login(c *gin.Context) {
 	b := utils.CheckPasswd(password,realPasswd)
 	if b {
 		user := dao.Mgr.GetUserByUserName(username)
-		token = user.Name + realPasswd
+		//用uuid代替token
+		token = user.UUID
 		fmt.Println(token)
 		c.JSON(http.StatusOK, UserLoginResponse{
 			Response: model.Response{StatusCode: 0},
@@ -95,8 +98,8 @@ func Login(c *gin.Context) {
 
 func UserInfo(c *gin.Context) {
 	token := c.Query("token")
-
-	if user, exist := usersLoginInfo[token]; exist {
+	user := dao.Mgr.GetUserByUUID(token)
+	if user.Name != "" {
 		c.JSON(http.StatusOK, UserResponse{
 			Response: model.Response{StatusCode: 0},
 			User:     user,

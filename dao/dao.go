@@ -23,6 +23,7 @@ type Manager interface {
 	GetUserPasswd(username string) string
 	GetUserByPassAndUsername(username string,password string) (model.UserInfo,bool)
 	GetUserByUserName(username string) model.User
+	GetUserByUUID(uuid string) model.User
 }
 var sysType = runtime.GOOS
 func init() {
@@ -97,5 +98,11 @@ func (mgr *manager) InsertUser(user *model.User){
 func (mgr *manager) GetUserByUserName(username string) model.User{
 	user := model.User{}
 	mgr.db.Where("name = ?",username).First(&user)
+	return user
+}
+
+func(mgr *manager) GetUserByUUID(uuid string) model.User{
+	user := model.User{}
+	mgr.db.Where("uuid = ?",uuid).First(&user)
 	return user
 }
